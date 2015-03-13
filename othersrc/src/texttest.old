@@ -1,0 +1,223 @@
+/*
+ * Copyright 2004 Sten Christoffer Eliesen
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_ttf.h"
+
+#include "box.h"
+#include "textbox.h"
+#include "dialog.h"
+#include "selector.h"
+#include "functions.h"
+
+int Quit = 0;
+#define SLEEP SDL_Delay(2000);
+
+//Selector sel1;
+
+void UpdateDisplay(SDL_Surface *screen)
+{
+	SDL_FillRect(screen, 0, SDL_MapRGB(screen->format, 0, 0, 0));
+//	sel1.Draw(screen, 250, 300);
+	SDL_Flip(screen);
+	SDL_Delay(1); // to free up CPU time
+}
+
+void KeyHandler(SDL_Surface *screen)
+{
+	/* Check for keys, update positions, and stuff */
+	SDL_Event event;
+	while ( SDL_PollEvent( &event ) )
+	{
+		switch ( event.type ) {
+			case SDL_KEYDOWN:	
+				SDL_keysym keysym = event.key.keysym;
+				switch ( keysym.sym ) {
+					case SDLK_RIGHT:
+						//sel1.Shift();
+						break;
+					case SDLK_LEFT: 	
+						break;
+					case SDLK_UP:		
+						break;
+					case SDLK_DOWN:		
+						break;
+					case SDLK_ESCAPE:
+					case SDLK_q:		
+						Quit = 1;
+						break;
+					default:			
+						break;
+				};					
+				break;
+			case SDL_QUIT:
+				/* exit(0); immidiate quit */
+				Quit = 1;
+				break; /* heh */
+			default:			
+				break;		
+		};
+	}
+}	
+
+void initprog(SDL_Surface **screen, TTF_Font **font)
+{	
+	/* Initialize SDL's video system and check for errors */
+	if ( SDL_Init( SDL_INIT_VIDEO ) != 0 ) {
+		printf("Unable to initialize SDL: %s\n", SDL_GetError() );
+		exit(1);
+	}
+
+	/* Make sure SDL_Quit & TTF_Quit gets called when the program exits! */
+	atexit( SDL_Quit );	
+	atexit( TTF_Quit );
+	
+	/* Init our font rendering engine */
+	if ( TTF_Init() == -1 ) {
+		printf("TTF_Init: %s\n", TTF_GetError());
+		exit(1); /* Brutaly exit here */
+	}
+	
+	SDL_EnableKeyRepeat( 100, 100 );
+
+	/* Attempt to set a 640x480 hicolor video mode */
+	*screen = SCE_SetVideoMode( 640, 480, 16, SDL_DOUBLEBUF | SDL_HWSURFACE 
+//		| SDL_SRCCOLORKEY | SDL_SRCALPHA | SDL_FULLSCREEN);
+		| SDL_SRCCOLORKEY | SDL_SRCALPHA );
+
+	/* Load font */
+	*font = SCE_OpenFont("fonts/Vera.ttf", 16);
+	/* If we got this far, everything worked */
+	printf("Startup: success!\n");
+}
+
+
+int main ( void )
+{	
+	SDL_Surface *screen;
+	TTF_Font *font_vera;
+	initprog(&screen, &font_vera);
+
+	Textbox text(screen, font_vera, 
+		"Here's some background text, heh. This should be really long.");
+	text.Draw(screen, 70, 120);
+	
+	Textbox text2(screen, font_vera, 
+		"Here's some background text, heh. This should be really long.");
+	text2.Draw(screen, 70, 190);
+
+	SDL_Flip(screen);
+	SLEEP
+	
+	SDL_Color *bgcolor = new SDL_Color;
+   SDL_Color *framecolor = new SDL_Color;
+
+	bgcolor->r = 30;
+	bgcolor->g = 70;
+	bgcolor->b = 30;
+
+	framecolor->r = 100;
+	framecolor->g = 150;
+	framecolor->b = 100;
+
+	//Dialog diag(screen, &bgcolor, &framecolor, font_vera, "Just tryin");
+	Dialog diag(screen, font_vera, "This is a blue box, and I am a boy");
+	diag.AddLine("And here's another line");
+	diag.ReCreate(screen);
+	diag.Draw(screen, 100, 100);
+
+	Dialog moretext;
+	moretext.SetFont(font_vera);
+	moretext.SetBackgroundColor(&bgcolor);
+	moretext.SetFrameColor(&framecolor);
+	moretext.AddLine("Sjallabais");
+	moretext.ReCreate(screen);
+	moretext.Draw(screen, 100, 200);
+
+	Dialog moretext2;
+	moretext2.SetFont(font_vera);
+	moretext2.SetBackgroundColor(&bgcolor);
+	moretext2.SetFrameColor(&framecolor);
+	moretext2.AddLine("My oh my how it goes");
+	moretext2.AddLine("Add one more line of text right here");
+	moretext2.SetAlignment(CENTER);
+	moretext2.ReCreate(screen);
+	moretext2.Draw(screen, 200, 180);
+
+	//Selector sel1(screen, font_vera, "This is an .. option");
+	Selector sel1;
+	printf("sel1.GetVisible(): %i\n", sel1.GetVisible());
+	sel1.SetFont(BOTH, font_vera);
+	sel1.SetFontColor(UNSELECTED, 150, 150, 150);
+	sel1.AddLine(BOTH, "This is an ... option!");
+	sel1.AddLine(BOTH, "This is line #two");
+	sel1.ReCreate(screen);
+	sel1.ReCreate(screen);
+	sel1.Draw(screen, 50, 300);
+	sel1.Shift();
+	sel1.Draw(screen, 250, 300);
+	SDL_Flip(screen);
+	SLEEP
+
+	Selector sel2(screen, font_vera, "This is selector #2");
+	//Selector sel2;
+	sel2.SetFont(BOTH, font_vera);
+	sel2.SetBackgroundColor(BOTH, &bgcolor);
+	sel2.SetFrameColor(BOTH, &framecolor);
+	sel2.AddLine(BOTH, "This is selector #2");
+	sel2.ReCreate(screen);
+	sel2.Draw(screen, 50, 400);
+
+	SDL_Rect *bluerect = new SDL_Rect;
+	bluerect->x = 0;
+	bluerect->y = 0;
+	bluerect->w = 70;
+	bluerect->h = 70;
+	Box box1;
+	box1.SetXY(300,350);
+	//box1.Visible();
+	box1.SetRect(&bluerect);
+	box1.ReCreate(screen);
+	box1.Draw(screen);
+	
+	SDL_Flip(screen);
+	SLEEP
+
+	Textbox done(screen, font_vera, 
+		"And we're done.");
+	done.Draw(screen, 500, 450);
+	SLEEP
+
+	while ( !Quit ) {
+		KeyHandler(screen);
+//		UpdateMovement();
+		UpdateDisplay(screen);
+	};
+	
+	printf("\nCleanup ahead:\n");
+
+	/* Cleanup */
+	SDL_FreeSurface(screen);
+	TTF_CloseFont(font_vera);
+	
+	return 0;
+}

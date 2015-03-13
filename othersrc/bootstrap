@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo Preparing makefiles by creating Makefile.in files:
+
+aclocal \
+&& autoheader \
+&& autoconf \
+&& automake --add-missing \
+&& echo Run ./configure to create makefiles. Then make to compile, and make clean to clean up

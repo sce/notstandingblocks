@@ -1,0 +1,61 @@
+/*
+*meny
+
+*program
+- håndtering av GUI
+- håndtering av spillet i ruta (selve spillet)
+	- gjentagende:
+	- klosser faller
+	- sjekk posisjon under kloss
+	- ny kloss kommer etter plassering: velg struktur (random) på kloss
+- håndtering av input
+*/
+
+#include <stdlib>
+
+class Square 
+{
+	private:
+		const int lineBlock = 0;
+		const int lBlock = 1;
+		const int tBlock = 2;
+		const int squareBlock = 3;
+
+	public:
+		void Square (void) { /* empty */ };
+
+}
+
+class Gamewindow 
+{
+	private:
+		const int mapX_ = 10;
+		const int mapY_ = 30;
+
+		bool[mapX_][mapY_] map_; // defines an array of squares making out a map
+
+		Square *activeSquare_; // there can only be one..
+
+	public:
+		void Gamewindow(void);
+		void startNew(void);
+		void runOnce(void);
+}
+
+void Gamewindow::GameWindow(void) { 
+	/* fail-safe values */
+	activeSquare_ = NULL;
+ }
+
+/*
+class GameGUI {
+
+}
+
+class Input {
+}*/
+
+void main(void)
+{
+	printf("Hello world!");
+}

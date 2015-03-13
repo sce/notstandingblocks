@@ -1,0 +1,27 @@
+# Ignore hidden files/dirs by default:
+.*
+!.gitignore
+
+# Misc temp/cache files:
+Makefile*
+!Makefile
+
+stamp*
+aclocal*
+*cache
+
+*.in
+*.ac
+*.log
+*.status
+
+*.o
+*.a
+*.P
+
+autoconf-template
+
+nsb/src/nsb
+
+# Specific stuff:
+log.log.txt

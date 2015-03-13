@@ -1,0 +1,3 @@
+# Dette må altså gjøres etter at alt er kompilert.
+# Det kompilers ved å kjøre output (-o) som samme navn, og include (-I) ../include.
+ar rc libSCE_commons.a src/*.o; ranlib libSCE_commons.a

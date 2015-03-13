@@ -1,0 +1,19 @@
+Requirements:
+  SDL-devel
+  SDL_mixer-devel
+  SDL_image-devel
+  SDL_ttf-devel
+
+To run:
+
+  make clean && make
+  cd nsb
+
+Then either:
+	./src/nsb
+or
+	./spill
+
+(working directory has to be nsb.. sorry about that)
+
+I haven't actually tried make install... so on your own risc with that :-)
