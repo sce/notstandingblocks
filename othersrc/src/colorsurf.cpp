@@ -139,17 +139,23 @@ int ColorSurface::ReCreate(SDL_Surface *screen)
 		SDL_FreeSurface(Surface);
 
 	// Create surface with right size
-	SDL_Surface *temp;
-	int status = (int)(temp = 
-		SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_SRCALPHA,
-		Rect->w, Rect->h, 
-		//screen->format->BitsPerPixel, screen->format->Rmask, 
-		32, screen->format->Rmask, 
-		screen->format->Gmask, screen->format->Bmask, 
-			screen->format->Amask));
+	SDL_Surface *temp = NULL;
+	temp =
+		SDL_CreateRGBSurface(
+      SDL_HWSURFACE | SDL_SRCALPHA,
+      Rect->w, Rect->h,
 
-	if (!status) return 1;
-		
+      //screen->format->BitsPerPixel,
+      //screen->format->Rmask,
+      32,
+      screen->format->Rmask,
+
+      screen->format->Gmask,
+      screen->format->Bmask,
+      screen->format->Amask);
+
+	if (!temp) return 1;
+
 	// Enable alphablending on surface (and set opaque)
 	//SDL_SetAlpha(Surface, SDL_SRCALPHA, Alpha);
 	SDL_SetAlpha(temp, SDL_SRCALPHA, Alpha);

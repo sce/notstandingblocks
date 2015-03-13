@@ -282,20 +282,19 @@ int Textbox::ReCreate(SDL_Surface* screen)
 	}
 
 	// - Create new surface
-	int status = (int)(textbox = 
-		// hmm.. SW surface or HW surface?
-		SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_SRCCOLORKEY 
-			| SDL_SRCALPHA | SDL_HWACCEL | SDL_RLEACCEL,
-		width, height, screen->format->BitsPerPixel, screen->format->Rmask, 
-		screen->format->Gmask, screen->format->Bmask, screen->format->Amask));
-	
-	if (!status) return 1; // CreateSurface returns zero on failure
+	// hmm.. SW surface or HW surface?
+	textbox = SDL_CreateRGBSurface(
+    SDL_HWSURFACE | SDL_SRCCOLORKEY | SDL_SRCALPHA | SDL_HWACCEL | SDL_RLEACCEL,
+    width, height, screen->format->BitsPerPixel, screen->format->Rmask,
+    screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
+
+	if (!textbox) return 1; // CreateSurface returns zero on failure
 
 	// Make the black (colorkey) transparent... or the ... bg transparent?
 	SDL_SetColorKey(textbox, SDL_SRCCOLORKEY, colorkey);
 
 	// - Blit text to new surface
-	status = 0;
+	int status = 0;
 	for (i=0; i<MAXLINES; i++) {
 		if (text[i] != NULL) {
 			switch (alignment) {

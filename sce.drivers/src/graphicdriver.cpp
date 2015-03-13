@@ -223,12 +223,12 @@ SDL_Surface *GraphicDriver::prepareText(char* text, TTF_Font *font,
 SDL_Surface* GraphicDriver::printText(SDL_Surface *screen, int x, int y,
 		char* text, TTF_Font *font, SDL_Color fg, SDL_Color bg)
 {
-	SDL_Surface *text_surface;
-	
-	int status = (int)(text_surface = prepareText( text, font, fg, bg ));
-	if (!status) return NULL; // Returns NULL on failure
-		
-	status = blit( screen, text_surface, x, y );
+	SDL_Surface *text_surface = NULL;
+
+	text_surface = prepareText( text, font, fg, bg );
+	if (!text_surface) return NULL; // Returns NULL on failure
+
+	int status = blit( screen, text_surface, x, y );
 	if (status) return NULL; // Returns NULL on failure
 
 	return text_surface;
