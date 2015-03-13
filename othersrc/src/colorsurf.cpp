@@ -1,6 +1,6 @@
 /*
  * Copyright 2004 Sten Christoffer Eliesen
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -89,7 +89,7 @@ ColorSurface::ColorSurface(SDL_Color **color, SDL_Rect **rect, int X, int Y)
 	layer = 0;
 }
 
-ColorSurface::ColorSurface(SDL_Surface *screen, SDL_Color **color, 
+ColorSurface::ColorSurface(SDL_Surface *screen, SDL_Color **color,
 		SDL_Rect **rect)
 {
 	Surface = NULL;
@@ -105,7 +105,7 @@ ColorSurface::ColorSurface(SDL_Surface *screen, SDL_Color **color,
 	ReCreate(screen);
 }
 
-ColorSurface::ColorSurface(SDL_Surface *screen, SDL_Color **color, 
+ColorSurface::ColorSurface(SDL_Surface *screen, SDL_Color **color,
 		SDL_Rect **rect, int X, int Y)
 {
 	Surface = NULL;
@@ -123,8 +123,8 @@ ColorSurface::ColorSurface(SDL_Surface *screen, SDL_Color **color,
 
 ColorSurface::~ColorSurface()
 {
-	if (Surface)	delete Surface;	
-	if (Color) 		delete Color;	
+	if (Surface)	delete Surface;
+	if (Color) 		delete Color;
 	if (Rect)		delete Rect;
 }
 
@@ -133,11 +133,11 @@ int ColorSurface::ReCreate(SDL_Surface *screen)
 	// Errorchecking:
 	if (Rect == NULL || Color == NULL)
 		return 1;
-	
+
 	// Delete old surface
 	if (Surface != NULL)
 		SDL_FreeSurface(Surface);
-	
+
 	// Create surface with right size
 	SDL_Surface *temp;
 	int status = (int)(temp = 
@@ -153,7 +153,7 @@ int ColorSurface::ReCreate(SDL_Surface *screen)
 	// Enable alphablending on surface (and set opaque)
 	//SDL_SetAlpha(Surface, SDL_SRCALPHA, Alpha);
 	SDL_SetAlpha(temp, SDL_SRCALPHA, Alpha);
-	
+
 	Surface = temp;
 	//Surface = SDL_DisplayFormatAlpha(temp);
 	//SDL_FreeSurface(temp);
@@ -166,17 +166,17 @@ int ColorSurface::DrawSurface(SDL_Surface *screen)
 {
 	/* Fill with right color */
 	return SDL_FillRect(Surface, 0, // zero means fill the whole surface
-		SDL_MapRGBA(screen->format, Color->r, Color->g, Color->b, Alpha)); 
+		SDL_MapRGBA(screen->format, Color->r, Color->g, Color->b, Alpha));
 }
 
 int ColorSurface::SetColor(SDL_Color **newcolor)
 {
 	if (*newcolor == NULL)
 		return 1;
-	
+
 	if (Color)
 		delete Color;
-	
+
 	Color = *newcolor;
 	return 0;
 }
@@ -184,10 +184,10 @@ int ColorSurface::SetColor(SDL_Color **newcolor)
 void ColorSurface::SetAlpha(int newalpha)
 {
 	if (newalpha < 0 || newalpha > 255) return;
-	
+
 	Alpha = newalpha;
 }
-	
+
 SDL_Color *ColorSurface::GetColor()
 {
 	return Color;
@@ -244,7 +244,7 @@ int ColorSurface::Draw(SDL_Surface *screen)
 
 int ColorSurface::Draw(SDL_Surface *screen, int X, int Y)
 {
-	// This doesn't change the objects position (x,y), 
+	// This doesn't change the objects position (x,y),
 	// so a Draw(screen) command would use the old (x,y)
 	// Use SetXY(X,Y) for that
 	if (visible)
@@ -257,7 +257,7 @@ int ColorSurface::SetRect(SDL_Rect **rect)
 	if (*rect == NULL) return 1;
 	if (Rect != NULL)
 		delete Rect;
-	
+
 	Rect = *rect;
 	return 0;
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright 2004 Sten Christoffer Eliesen
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -112,7 +112,7 @@ Textbox::~Textbox()
 	for ( i=0; i<MAXLINES; i++ )
 		if ( text[i] != NULL )
 			SDL_FreeSurface( text[i] );
-	
+
 	if ( textbox != NULL )
 		SDL_FreeSurface( textbox );
 }
@@ -147,7 +147,7 @@ void Textbox::SetBG(int r, int g, int b)
 	bg.r = (int)r;
 	bg.g = (int)g;
 	bg.b = (int)b;
-} 
+}
 
 int Textbox::AddLine(char* string)
 {
@@ -156,7 +156,7 @@ int Textbox::AddLine(char* string)
 	for ( i=0; i<MAXLINES; i++ )
 		if ( text[i] == NULL ) {
 			empty = i;
-			break; }	
+			break; }
 
 	//printf("(%u)AddLine: empty=%i, \"%s\"\n", int(this), empty, string);
 	/* None are empty, text can not be added */
@@ -166,7 +166,7 @@ int Textbox::AddLine(char* string)
 	// Render text on that surface
 	if (!(text[empty] = GraphicDriver::prepareText(string, font, fg, bg)))
 		return 1; // CreateSurface returns zero on failure
-	
+
 	SDL_SetColorKey(text[empty], SDL_SRCCOLORKEY, colorkey);
 	// Update textbox-surface
 	//return ReCreateTextbox(screen);
@@ -179,11 +179,11 @@ int Textbox::RemoveLine(int line)
 	// Check if exists
 	if(text[line] == NULL)
 		return 1;
-	
+
 	// Remove surface
 	SDL_FreeSurface(text[line]);
 	text[line] = NULL;
-	
+
 	// Update text[] table
 	/*
 	text[line] = text[line+1];
@@ -191,12 +191,12 @@ int Textbox::RemoveLine(int line)
 	...
 	text[MAXLINES-2] = text[MAXLINES-1];
 	done */
-	
+
 	for(i=line; i<MAXLINES-1; i++)
 		text[i] = text[i+1]; // each pointer after "line" now points to
 							 // the surface benieth it in the table,
 							 // effectively bumping those surfaces one place up
-	
+
 	// The last one will be empty, since we've removed a line
 	text[MAXLINES-1] = (int)NULL;
 
@@ -216,15 +216,15 @@ int Textbox::InsertLine(int line, char* string)
  *	text[line+2] = text[line+1];
  *	...
  *	text[MAXLINES-1] = text[MAXLINES-2];
- *	done 
+ *	done
  *	-- this will duplicate all lines to one surface, so use reversed order.
  * text[MAXLINES-1] = text[MAXLINES-2];
  *	text[MAXLINES-2] = text[MAXLINES-3];
  *	...
  *	text[line+1] = text[line];
  *	done */
-	
-	int i = 0;	
+
+	int i = 0;
 	for(i=MAXLINES-1; i>=line; i--)
 		text[i] = text[i-1]; // each line (starting from the end of the table)
 							 // now points to the surface before it
@@ -274,13 +274,13 @@ int Textbox::ReCreate(SDL_Surface* screen)
 				width = text[i]->w;
 		}
 	}
-	
+
 	// - Destroy / remove old surface
 	if (textbox != NULL) {
 		SDL_FreeSurface( textbox );
 		textbox = NULL;
 	}
-	
+
 	// - Create new surface
 	int status = (int)(textbox = 
 		// hmm.. SW surface or HW surface?
@@ -293,22 +293,22 @@ int Textbox::ReCreate(SDL_Surface* screen)
 
 	// Make the black (colorkey) transparent... or the ... bg transparent?
 	SDL_SetColorKey(textbox, SDL_SRCCOLORKEY, colorkey);
-	
+
 	// - Blit text to new surface
 	status = 0;
 	for (i=0; i<MAXLINES; i++) {
 		if (text[i] != NULL) {
 			switch (alignment) {
 				case RIGHT:
-					blit = GraphicDriver::blit(textbox, text[i], 0, 
+					blit = GraphicDriver::blit(textbox, text[i], 0,
 							(lineheight+linespace)*i);
 					break;
 				case CENTER:
-					blit = GraphicDriver::blit(textbox, text[i], 
+					blit = GraphicDriver::blit(textbox, text[i],
 							(width/2)-(text[i]->w/2), (lineheight+linespace)*i);
 					break;
 				case LEFT:
-					blit = GraphicDriver::blit(textbox, text[i], width-text[i]->w, 
+					blit = GraphicDriver::blit(textbox, text[i], width-text[i]->w,
 						(lineheight+linespace)*i);
 					break;
 			};

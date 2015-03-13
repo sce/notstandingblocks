@@ -1,6 +1,6 @@
 /*
  * Copyright 2004 Sten Christoffer Eliesen
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -32,36 +32,36 @@ int GraphicDriver::instances = 0;
 SDL_Surface *GraphicDriver::screen = NULL;
 
 GraphicDriver::GraphicDriver(void) {
-	//printf("GraphicDriver()\n");	
+	//printf("GraphicDriver()\n");
 	instances++;
 }
 
 GraphicDriver::~GraphicDriver(void) {
-	//printf("~GraphicDriver()\n");	
+	//printf("~GraphicDriver()\n");
 	if ( --instances == 0 && screen != NULL ) {
-		//printf(" -> Destroying screen\n");	
+		//printf(" -> Destroying screen\n");
 		SDL_FreeSurface(screen);
 		//if ( TTF_WasInit() ) {
-			//printf("  -> Quitting TTF\n");	
-			//TTF_Quit();		
+			//printf("  -> Quitting TTF\n");
+			//TTF_Quit();
 		//}
 		/*
 		if ( SDL_WasInit(SDL_INIT_EVERYTHING) ) {
-			//printf("   -> And finally shutting down SDL\n");	
+			//printf("   -> And finally shutting down SDL\n");
 			//SDL_Quit();
 		}
-		else 
-			//printf("   -> ..SDL not initialized??");	
+		else
+			//printf("   -> ..SDL not initialized??");
 			 */
 	}
 }
 
-int GraphicDriver::getResX(void) { 
+int GraphicDriver::getResX(void) {
 	if ( resX == 0 ) {
 		printf("Graphics::getResx(): Returning resX before it's given value.\n");
 		exit(1); }
 
-	return resX; 
+	return resX;
 }
 
 int GraphicDriver::getResY(void) {
@@ -69,15 +69,15 @@ int GraphicDriver::getResY(void) {
 		printf("Grapihcs::getResY(): Returning resY before it's given value.\n");
 		exit(1); }
 
- 	return resY; 
+ 	return resY;
 }
 
-int GraphicDriver::getDepth(void) { 
+int GraphicDriver::getDepth(void) {
 	if ( depth == 0 ) {
 		printf("Graphics::getDepth(): Returning depth before it's given value.\n");
 		exit(1); }
 
-	return depth; 
+	return depth;
 }
 
 
@@ -154,7 +154,7 @@ SDL_Surface *GraphicDriver::loadImage(const char* imagename) {
 		// This is better, as it allows the caller to make the decision necessary.
 		return NULL;
 	}
-	
+
 	/* Convert to framebuffers displayformat */
 	//SDL_Surface *image = SDL_DisplayFormat(temp);
 	SDL_Surface *image = SDL_DisplayFormatAlpha(temp);
@@ -183,9 +183,9 @@ int GraphicDriver::blit(SDL_Surface *screen, SDL_Surface *surface, int x, int y)
 			" || x > screen->w || y > screen->h!\n");
 		return 1;
 	}
-	
-	SDL_Rect src, dest;	
-		
+
+	SDL_Rect src, dest;
+
 	src.x = 0;
 	src.y = 0;
 	src.w = surface->w;
@@ -194,17 +194,17 @@ int GraphicDriver::blit(SDL_Surface *screen, SDL_Surface *surface, int x, int y)
 	dest.y = y;
 	dest.w = surface->w;
 	dest.h = surface->h;
-	
+
 	/* Blit to screen */
 	return SDL_BlitSurface( surface, &src, screen, &dest );
 }
 
-SDL_Surface *GraphicDriver::prepareText(char* text, TTF_Font *font, 
+SDL_Surface *GraphicDriver::prepareText(char* text, TTF_Font *font,
 		SDL_Color fg, SDL_Color bg)
 {
 	SDL_Surface *text_surface;
 	SDL_Surface *temp;
-	
+
 	/* Render font on new surface */
 	if ( !(temp=TTF_RenderText_Shaded(font,text,fg,bg)) ) {
 		printf(" * Graphics::prepareText:"
@@ -216,11 +216,11 @@ SDL_Surface *GraphicDriver::prepareText(char* text, TTF_Font *font,
 	/* Fix display format of new surface for future use */
 	text_surface = SDL_DisplayFormat( temp );
 	SDL_FreeSurface( temp );
-	
-	return text_surface;	
+
+	return text_surface;
 }
 
-SDL_Surface* GraphicDriver::printText(SDL_Surface *screen, int x, int y, 
+SDL_Surface* GraphicDriver::printText(SDL_Surface *screen, int x, int y,
 		char* text, TTF_Font *font, SDL_Color fg, SDL_Color bg)
 {
 	SDL_Surface *text_surface;
@@ -230,6 +230,6 @@ SDL_Surface* GraphicDriver::printText(SDL_Surface *screen, int x, int y,
 		
 	status = blit( screen, text_surface, x, y );
 	if (status) return NULL; // Returns NULL on failure
-	
+
 	return text_surface;
 }
