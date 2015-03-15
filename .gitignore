@@ -4,20 +4,19 @@
 
 # Misc temp/cache files:
 Makefile*
-!*.am
-
 stamp*
 aclocal*
 *cache
 
 *.in
-*.ac
 *.log
 *.status
 
 *.o
 *.a
 *.P
+
+!*.am
 
 autoconf-template
 
