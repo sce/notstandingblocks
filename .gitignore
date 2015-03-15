@@ -1,3 +1,5 @@
+*~
+
 # Ignore hidden files/dirs by default:
 .*
 !.gitignore
