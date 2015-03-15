@@ -1,0 +1,7 @@
+To fix automake:
+
+  $ touch NEWS README AUTHORS ChangeLog
+  $ ./bootstrap
+  $ ./configure
+  $ make clean
+  $ make
