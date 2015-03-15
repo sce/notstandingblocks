@@ -4,7 +4,7 @@
 
 # Misc temp/cache files:
 Makefile*
-!Makefile
+!*.am
 
 stamp*
 aclocal*
