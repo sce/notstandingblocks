@@ -2,10 +2,10 @@
 
 // initialize static members:
 enum LOG::LOGLEVEL LOG::loglevel_ = LOG::DEBUG;
-const char* LOG::logname_[6] = 
+const char* LOG::logname_[6] =
 	{ "   NONE", "  ERROR", "WARNING", "   INFO", "VERBOSE", "  DEBUG" };
 
-const enum LOG::LOGLEVEL LOG::DEFAULTLL = LOG::NONE; // means class LOG 
+const enum LOG::LOGLEVEL LOG::DEFAULTLL = LOG::NONE; // means class LOG
 																		// will decide
 unsigned int const LOG::MAXWRITES = 1000;
 FILE* LOG::logfile_ = NULL; // when NULL: log is sent to the terminal
@@ -28,9 +28,9 @@ int LOG::setLogfile(char* filename)
 	if ( filename == NULL )
 		return 0; // don't open any new file, use terminal. 0 means success
 
-	
-	//logfile_ = fopen(filename, "a"); 
-	logfile_ = fopen(filename, "w"); 
+
+	//logfile_ = fopen(filename, "a");
+	logfile_ = fopen(filename, "w");
 
 	if ( logfile_ != NULL )
 	{
@@ -52,7 +52,7 @@ void LOG::closeLogfile(void)
 	}
 }
 
-void LOG::Log(char* message, enum LOGLEVEL ll, 
+void LOG::Log(char* message, enum LOGLEVEL ll,
 						 			  enum LOGLEVEL wantll)
 {
 	if ( loglevel_ == NONE && logfile_ == NULL )
