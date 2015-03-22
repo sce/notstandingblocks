@@ -30,7 +30,7 @@ class Input
 		};
 
 		Input(void);
-		static enum USERACTION getAction(void);
+		static enum USERACTION getAction(bool wait);
 };
 
 #endif
