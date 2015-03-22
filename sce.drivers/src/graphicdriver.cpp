@@ -29,7 +29,9 @@ int GraphicDriver::resX = 0;
 int GraphicDriver::resY = 0;
 int GraphicDriver::depth = 0;
 int GraphicDriver::instances = 0;
-SDL_Surface *GraphicDriver::screen = NULL;
+
+SDL_Window *GraphicDriver::window = NULL;
+SDL_Renderer *GraphicDriver::renderer = NULL;
 
 GraphicDriver::GraphicDriver(void) {
 	//printf("GraphicDriver()\n");
@@ -37,23 +39,7 @@ GraphicDriver::GraphicDriver(void) {
 }
 
 GraphicDriver::~GraphicDriver(void) {
-	//printf("~GraphicDriver()\n");
-	if ( --instances == 0 && screen != NULL ) {
-		//printf(" -> Destroying screen\n");
-		SDL_FreeSurface(screen);
-		//if ( TTF_WasInit() ) {
-			//printf("  -> Quitting TTF\n");
-			//TTF_Quit();
-		//}
-		/*
-		if ( SDL_WasInit(SDL_INIT_EVERYTHING) ) {
-			//printf("   -> And finally shutting down SDL\n");
-			//SDL_Quit();
-		}
-		else
-			//printf("   -> ..SDL not initialized??");
-			 */
-	}
+  --instances;
 }
 
 int GraphicDriver::getResX(void) {
@@ -82,11 +68,11 @@ int GraphicDriver::getDepth(void) {
 
 
 void GraphicDriver::flip(void) {
-	SDL_Flip(screen);
+  SDL_RenderPresent(renderer);
 }
 
-SDL_Surface *GraphicDriver::getScreen(void) {
-	return screen;
+SDL_Renderer *GraphicDriver::getRenderer(void) {
+	return renderer;
 }
 
 void GraphicDriver::setupFont(void) {
@@ -107,18 +93,11 @@ void GraphicDriver::setupScreen(int resx, int resy, int newDepth, unsigned int f
 
 	// continue as normal:
 
-	if ( depth == 0 ) { // meaning: use current bpp
-		const SDL_VideoInfo* currentSetup = NULL;
-
-		currentSetup = SDL_GetVideoInfo();
-		depth = currentSetup->vfmt->BitsPerPixel;
-	}
-
-	resX = resx;
-	resY = resy;
+	this->resX = resx;
+	this->resY = resy;
 	depth = newDepth;
 
-	screen = setVideoMode(resX, resY, depth, flags);
+	setVideoMode(resX, resY, depth, flags);
 }
 
 TTF_Font *GraphicDriver::openFont(const char* font, int ptsize) {
@@ -131,18 +110,44 @@ TTF_Font *GraphicDriver::openFont(const char* font, int ptsize) {
 	return temp;
 }
 
-SDL_Surface *GraphicDriver::setVideoMode(int w, int h, int bpp, unsigned int flags) {
-	SDL_Surface *temp;
-	temp = SDL_SetVideoMode( w, h, bpp, flags );
-	if ( temp == NULL ) {
+void GraphicDriver::setVideoMode(int w, int h, int bpp, unsigned int flags) {
+  // TODO: Add title.
+  // We as for 0/0 width/height to make SDL use the current resolution, and
+  // rather set "logical size" to have SDL do hardware scaling.
+  if ( window == NULL ) {
+    window = SDL_CreateWindow(
+      "",
+      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      //0, 0, flags );
+      w, h, 0 );
+  }
+
+	if ( window == NULL ) {
 		printf(" * Graphics::setVideoMode():"
 			"\nUnable to set video mode: %s\n", SDL_GetError() );
 		exit(1); /* Hard exit */
 	}
-	return temp;
+
+  if ( renderer == NULL ) {
+    //renderer = SDL_CreateRenderer(window, -1, 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  }
+
+  if ( renderer == NULL ) {
+    printf(" * Graphics::setVideoMode():"
+        "\nUnable to create renderer: %s\n", SDL_GetError() );
+    exit(1);
+  }
+
+  // to make the scaled rendering look smoother:
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+  SDL_RenderSetLogicalSize(renderer, w, h);
+
+  SDL_RenderClear(renderer);
+  SDL_RenderPresent(renderer);
 }
 
-SDL_Surface *GraphicDriver::loadImage(const char* imagename) {
+SDL_Texture *GraphicDriver::loadImage(const char* imagename) {
 	SDL_Surface *temp = IMG_Load( imagename );
 	if ( temp == NULL ) {
 		printf(" * Graphics::loadImage():"
@@ -157,30 +162,43 @@ SDL_Surface *GraphicDriver::loadImage(const char* imagename) {
 
 	/* Convert to framebuffers displayformat */
 	//SDL_Surface *image = SDL_DisplayFormat(temp);
-	SDL_Surface *image = SDL_DisplayFormatAlpha(temp);
+	//SDL_Surface *image = SDL_DisplayFormatAlpha(temp);
 
-	SDL_FreeSurface(temp); // free up old surface, preventing memory leak
+	SDL_Texture *image = SDL_CreateTextureFromSurface(renderer, temp);
+	SDL_FreeSurface(temp);
+
 	return image;
 }
 
 
-int GraphicDriver::blitToMain( SDL_Surface *surface, int x, int y) {
-	if ( screen == NULL ) {
-		printf("Graphics::blitToMain(): Trying to blit to empty main surface.\n");
-		return 1;
-	}
-	return blit(screen, surface, x, y);
+bool GraphicDriver::isInsideRenderer(int x, int y) {
+  if (x < 0 || y < 0)
+    return false;
+
+  if (!renderer)
+    return false;
+
+  bool results = true;
+  SDL_RendererInfo ri;
+
+  if (SDL_GetRendererInfo(renderer, &ri)) {
+    printf(" * GraphicsDriver::is:InsideRenderer: %s.\n", SDL_GetError());
+    return false;
+  }
+
+  if (x > ri.max_texture_width || y > ri.max_texture_height )
+    results = false;
+
+  return results;
 }
 
-int GraphicDriver::blit(SDL_Surface *screen, SDL_Surface *surface, int x, int y) {
-	if ( screen == NULL || surface == NULL ) {
-		printf("Error: Blit: screen || surface == 0!\n");
+int GraphicDriver::blitToMain(SDL_Texture *source, int x, int y) {
+	if ( renderer == NULL || source == NULL ) {
+		printf("Error: Blit: renderer || source == 0!\n");
 		return 1;
 	}
 
-	if (x < 0 || y < 0 || x > screen->w || y > screen->h) {
-		printf("Error: Blit: x < 0 || y < 0"
-			" || x > screen->w || y > screen->h!\n");
+	if (!isInsideRenderer(x, y)) {
 		return 1;
 	}
 
@@ -188,21 +206,21 @@ int GraphicDriver::blit(SDL_Surface *screen, SDL_Surface *surface, int x, int y)
 
 	src.x = 0;
 	src.y = 0;
-	src.w = surface->w;
-	src.h = surface->h;
+
+  SDL_QueryTexture(source, NULL, NULL, &src.w, &src.h);
+
 	dest.x = x;
 	dest.y = y;
-	dest.w = surface->w;
-	dest.h = surface->h;
 
-	/* Blit to screen */
-	return SDL_BlitSurface( surface, &src, screen, &dest );
+  SDL_QueryTexture(source, NULL, NULL, &dest.w, &dest.h);
+
+	/* Blit to target */
+	return SDL_RenderCopy( renderer, source, &src, &dest );
 }
 
-SDL_Surface *GraphicDriver::prepareText(char* text, TTF_Font *font,
+SDL_Texture *GraphicDriver::prepareText(char* text, TTF_Font *font,
 		SDL_Color fg, SDL_Color bg)
 {
-	SDL_Surface *text_surface;
 	SDL_Surface *temp;
 
 	/* Render font on new surface */
@@ -213,23 +231,22 @@ SDL_Surface *GraphicDriver::prepareText(char* text, TTF_Font *font,
 		return NULL; // returns NULL on failure
 	}
 
-	/* Fix display format of new surface for future use */
-	text_surface = SDL_DisplayFormat( temp );
+	SDL_Texture *text_surface = SDL_CreateTextureFromSurface(renderer, temp);
 	SDL_FreeSurface( temp );
 
 	return text_surface;
 }
 
-SDL_Surface* GraphicDriver::printText(SDL_Surface *screen, int x, int y,
+SDL_Texture* GraphicDriver::printText(int x, int y,
 		char* text, TTF_Font *font, SDL_Color fg, SDL_Color bg)
 {
-	SDL_Surface *text_surface = NULL;
-
-	text_surface = prepareText( text, font, fg, bg );
+	SDL_Texture *text_surface = prepareText( text, font, fg, bg );
 	if (!text_surface) return NULL; // Returns NULL on failure
 
-	int status = blit( screen, text_surface, x, y );
-	if (status) return NULL; // Returns NULL on failure
+	if ( blitToMain( text_surface, x, y) ) {
+    SDL_DestroyTexture(text_surface);
+    return NULL; // Returns NULL on failure
+  }
 
 	return text_surface;
 }
