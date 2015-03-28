@@ -24,8 +24,8 @@ class Input
 
 			GOLEFT,
 			GORIGHT,
-			GOUP,		
-			GODOWN		
+			GOUP,
+			GODOWN
 			//ROTATEBLOCK	// not used in menu
 		};
 
