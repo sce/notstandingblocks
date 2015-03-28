@@ -80,24 +80,24 @@ void GraphicDriver::setupFont(void) {
 		printf("TTF_Init: %s\n", TTF_GetError());
 		exit(1);
 	}
-	//atexit(TTF_Quit); // automatic shutdown
+	atexit(TTF_Quit);
 }
 
 void GraphicDriver::setupScreen(int resx, int resy, int newDepth, unsigned int flags) {
-	// warning: should check if sdl is running first
-   if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0) {
-		printf("SDL init failed!\n");
-      exit(1); }
+  // int subsystem_init = SDL_WasInit(SDL_INIT_EVERYTHING);
+  // bool video = subsystem_init & SDL_INIT_VIDEO;
+  bool video = (SDL_WasInit(SDL_INIT_VIDEO) != 0);
 
-	//atexit(SDL_Quit); // automatic shutdown
-
-	// continue as normal:
+  if (!video && SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0) {
+    printf("SDL init failed!\n");
+    exit(1); }
 
 	this->resX = resx;
 	this->resY = resy;
 	depth = newDepth;
 
 	setVideoMode(resX, resY, depth, flags);
+  atexit(SDL_Quit);
 }
 
 TTF_Font *GraphicDriver::openFont(const char* font, int ptsize) {
